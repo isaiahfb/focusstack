@@ -89,22 +89,49 @@ for image in alignedImages:
     i+=1
 
 
-#
-# guassian blur images
-#
-#
+# function to gaussian blur and calculate laplacian
 
-#
-# calculate laplacian of each image
-#
-#
+def blurAndLaplacian(image):
+    kernelSize = 5
+    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurredImage = cv2.GaussianBlur(grayImage, (kernelSize, kernelSize), 0)
+    laplacian = cv2.Laplacian(blurredImage, cv2.CV_64F, kernelSize)
+    return laplacian
 
-#
+
+
+# calculate the laplacian of all of the images
+# and store in list called laplacianList
+laplacianList = []
+for image in alignedImages:
+    laplacianList.append(blurAndLaplacian(image))
+
+# display all the laplacians
+for laplacian in laplacianList:
+    plt.imshow(laplacian, cmap = plt.cm.gray)
+    plt.show()
+
+
 # for each (x, y) point, choose the pixel with the greatest absolute value of laplacian from the stack and place it in new image
 #
-#
 
-#
-# output created image
-#
-#
+
+laplacianArray = np.asarray(laplacianList)
+absLap = np.absolute(laplacianArray)
+maxLap = absLap.max(axis=0)
+mask = absLap == maxLap
+
+merged = np.zeros(shape=alignedImages[0].shape, dtype=alignedImages[0].dtype)
+for i in range(len(alignedImages)):
+    for row in range(len(alignedImages[i])):
+        for col in range(len(alignedImages[i][row])):
+            if mask[i][row][col] == True:
+                merged[row][col] = alignedImages[i][row][col]
+
+# display merged image
+plt.imshow(merged)
+plt.show()
+
+# write merged image to google drive
+imageName = "merged.jpg"
+cv2.imwrite(os.path.join(resultsPath,imageName), cv2.cvtColor(merged, cv2.COLOR_RGB2BGR))
