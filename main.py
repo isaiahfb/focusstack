@@ -10,8 +10,9 @@ from google.colab import drive
 drive.mount('/content/drive')
 
 #read in a set of images with different focus points
-# store images in list called images
-folderPath = "/content/drive/My Drive/CP2/focusstack/tie/"
+#store images in list called images
+folderPath = "/content/drive/My Drive/CP2/focusstack/nikeshoe/"
+resultsPath = "/content/drive/My Drive/CP2/focusstack/results/nikeshow"
 images = []
 for imageName in os.listdir(folderPath):
     print(imageName)
@@ -34,7 +35,7 @@ def alignImages(image1, image2):
     image2Gray = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
 
     # detect ORB features and create keypoints and descriptors
-    orb = cv2.ORB_create(1000)
+    orb = cv2.ORB_create(5000)
     kp1, d1 = orb.detectAndCompute(image1Gray, None) 
     kp2, d2 = orb.detectAndCompute(image2Gray, None)
 
@@ -48,7 +49,7 @@ def alignImages(image1, image2):
 
     # create image with top matches shown 
     matchImage = cv2.drawMatches(image1, kp1, image2, kp2, matches, None)
-    cv2.imwrite(os.path.join(folderPath,"matches.jpg"), matchImage)
+    cv2.imwrite(os.path.join(resultsPath,"matches.jpg"), matchImage)
 
     # create a matrix with the locations of the good matches 
     p1 = np.zeros((len(matches), 2)) 
@@ -70,9 +71,9 @@ def alignImages(image1, image2):
 
 # align all images and store in list 
 alignedImages = []
-refImage = images[0]
+refImage = images[1]
 alignedImages.append(refImage)
-for image in images[1:]:
+for image in images[0:]:
     alignedImage = alignImages(image,refImage)
     alignedImages.append(alignedImage)
 
@@ -85,7 +86,7 @@ for image in alignedImages:
 i = 0
 for image in alignedImages:
     imageName = "aligned" + str(i) + ".jpg"
-    cv2.imwrite(os.path.join(folderPath,imageName), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+    cv2.imwrite(os.path.join(resultsPath,imageName), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
     i+=1
 
 
